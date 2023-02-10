@@ -29,12 +29,10 @@ from copy import deepcopy
 import pprint as pp
 import math
 
-######################################
+################## COPY TO API GLOBAL FIELDS ####################
 
 model_file = f"Models/AcaciaNorthBearing_0.86_1674070689.h5"
 # image_folder = f"Images"
-
-
 
 camera_settings = {
     "A1": {"fov": 84, "ralt": 50},
@@ -54,9 +52,6 @@ length_ratio = 2
 hypotenuse = (width_ratio**2 + length_ratio**2) ** 0.5
 
 
-#########################################
-
-
 geo_boundaries = {"type": "FeatureCollection", "features": []}
 
 feature = {
@@ -68,9 +63,7 @@ feature = {
 
 
 
-#########################################
-
-
+################### USE THIS FUNCTION IN API TO GIVE STAT RESULTS ######################
 
 def detect_images(imagefile=f"Images/A1/Autonomous Flight/DJI_0096.JPG", rotate_180=False) -> object:
 

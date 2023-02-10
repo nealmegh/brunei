@@ -5,18 +5,18 @@ Copyright (c) 2019 - present AppSeed.us
 
 from apps.home import blueprint
 from flask import Flask, render_template, request, render_template, send_file, request, jsonify, json, make_response
-from flask_login import login_required
+from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 
 from re import S
 
 # from flask import Flask, render_template, send_file, request, jsonify, json, make_response
 from flask_wtf import FlaskForm
-from wtforms import FileField, SubmitField
+from wtforms import FileField, SubmitField, StringField, IntegerField, HiddenField
 from werkzeug.utils import secure_filename
 # import os
 from wtforms.validators import InputRequired
-
+from apps import db
 
 import json
 from threading import active_count
@@ -43,6 +43,7 @@ import matplotlib.patches as patches
 from PIL import Image
 import numpy as np
 from copy import deepcopy
+from apps.pictures.models import Pictures
 
 
 app = Flask(__name__)
@@ -52,11 +53,12 @@ app.config['UPLOAD_FOLDER'] = 'files'
 @blueprint.route('/index')
 @login_required
 def index():
+    # curr_user = current_user.id
     return render_template('home/index.html', segment='index')
 
 
 @blueprint.route('/upload')
-# @login_required
+@login_required
 def data_upload():
     form = UploadFileFrom()
     return render_template('home/uploadImage.html', form=form, segment='index')
@@ -111,7 +113,7 @@ class UploadFileFrom(FlaskForm):
 
 
 @blueprint.route('/detect', methods=['POST'])
-# @login_required
+@login_required
 def detect():
 
     form = UploadFileFrom()
@@ -214,11 +216,19 @@ def detect():
         datacpy = np.asarray(datacpy, dtype='float32')
         datacpy = datacpy / 255.0
 
-        plt.imsave('apps/static/files/test1234.jpg', datacpy)
+        file_path = f'apps/static/files/test1234.jpg'
+        plt.imsave(file_path, datacpy)
         imgplot = plt.imshow(datacpy)
         plt.tight_layout()
         plt.savefig('apps/static/files/plt_save.jpg')
         # plt.show()
+        latitude = 52.48520356878089
+        longitude = -1.8837072925779699
+        curr_user = current_user.id
+        picture = Pictures(file_path, latitude, longitude, user_id=curr_user, area_coverage='80%')
+        db.session.add(picture)
+        db.session.commit()
 
         # return send_file('test1234.jpg', mimetype='image/jpg')
         return render_template('home/viewResults.html', image_filename='test1234.jpg')
+

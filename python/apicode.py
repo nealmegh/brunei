@@ -1,7 +1,7 @@
 import json
 from threading import active_count
-import matplotlib.pyplot as plt
-import numpy as np
+# import matplotlib.pyplot as plt
+# import numpy as np
 import PIL
 import os
 import random
@@ -18,9 +18,9 @@ from operator import truediv
 import os
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-import pprint as pp
+# import pprint as pp
 import matplotlib.patches as patches
-from intersects import intersects
+# from intersects import intersects
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 from exif import Image as EXIMAGE
@@ -42,7 +42,7 @@ import math
 # }
 
 # tag_name = 'A1'
-model_file = f"Models/AcaciaNorthBearing_0.86_1674070689.h5"
+model_file = f"python/Models/AcaciaNorthBearing_0.86_1674070689.h5"
 image_folder = f"Images"
 
 # south_bearing = ['DJI_0098', 'DJI_0110',
@@ -154,12 +154,13 @@ def image_coordinates(image_path):
 # input()
 
 
-def detect_images(imagefile=f"Images/A1/Autonomous Flight/DJI_0096.JPG") -> object:
-
-    model = tf.keras.models.load_model(model_file)
+# def detect_images(imagefile=f"Images/A1/Autonomous Flight/DJI_0096.JPG") -> object:
+def detect_images(imagefile=Image) -> object:
+    model = tf.keras.models.load_model(model_file, compile=False)
+    print('hi')
     model.summary()
     probability_model = keras.Sequential([model, tf.keras.layers.Softmax()])
-
+    print(os.path.join(os.path.abspath(os.path.dirname(__file__))))
     rotate_180 = False
 
     ratio_coeff = camera_settings["A1"]["fov"] / hypotenuse
@@ -421,8 +422,8 @@ def detect_images(imagefile=f"Images/A1/Autonomous Flight/DJI_0096.JPG") -> obje
                 # return ex
                 print("something wrong", ex)
 
-    return {stats, coverage_sem4, coverage_sem3, coverage_sem2, coverage_sem1}
-
+    # return {stats, coverage_sem4, coverage_sem3, coverage_sem2, coverage_sem1}
+    return {'a': stats, 'b': coverage_sem4, 'c': coverage_sem3, 'd': coverage_sem2, 'e': coverage_sem1}
     # datacpy1 = data
     # plt.imsave(f'Results/Images/{imgNo}_coverage_{round(len(coverage) / tcoverage, 2)}.png', datacpy1)
 

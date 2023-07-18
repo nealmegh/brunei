@@ -37,21 +37,21 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-          <li class="nav-item has-treeview {% if 'index' in segment %} menu-open {% endif %}">
-            <a href="#" class="nav-link {% if 'index' in segment %} active {% endif %}">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Dashboard
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="/index.html" class="nav-link {% if 'index.html' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v1</p>
-                </a>
-              </li>
+{#          <li class="nav-item has-treeview {% if 'index' in segment %} menu-open {% endif %}">#}
+{#            <a href="#" class="nav-link {% if 'index' in segment %} active {% endif %}">#}
+{#              <i class="nav-icon fas fa-tachometer-alt"></i>#}
+{#              <p>#}
+{#                Dashboard#}
+{#                <i class="right fas fa-angle-left"></i>#}
+{#              </p>#}
+{#            </a>#}
+{#            <ul class="nav nav-treeview">#}
+{#              <li class="nav-item">#}
+{#                <a href="/index.html" class="nav-link {% if 'index.html' in segment %} active {% endif %}">#}
+{#                  <i class="far fa-circle nav-icon"></i>#}
+{#                  <p>Dashboard v1</p>#}
+{#                </a>#}
+{#              </li>#}
 {#              <li class="nav-item">#}
 {#                <a href="/index2.html" class="nav-link {% if 'index2.html' in segment %} active {% endif %}">#}
 {#                  <i class="far fa-circle nav-icon"></i>#}
@@ -64,8 +64,8 @@
 {#                  <p>Dashboard v3</p>#}
 {#                </a>#}
 {#              </li>#}
-            </ul>
-          </li>
+{#            </ul>#}
+{#          </li>#}
 {#          <li class="nav-item">#}
 {#            <a href="widgets.html" class="nav-link {% if 'widgets' in segment %} active {% endif %}">#}
 {#              <i class="nav-icon fas fa-th"></i>#}
@@ -293,11 +293,35 @@
 {#              </p>#}
 {#            </a>#}
 {#          </li>#}
-{#          <li class="nav-item">#}
+          <li class="nav-item">
+            <a href="{{ url_for('home_blueprint.index') }}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Dashboard
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a href="{{ url_for('home_blueprint.data_upload') }}" class="nav-link">
               <i class="nav-icon far fa-image"></i>
               <p>
                 Data Upload
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('pictures_blueprint.all_data') }}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                All Data
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('home_blueprint.export') }}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Export
               </p>
             </a>
           </li>

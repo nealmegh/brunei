@@ -76,13 +76,13 @@ def detect_images(imagefile, rotate_180=False) -> object:
         with open(image_path, "rb") as src:
             img = EXIMAGE(src)
         if img.has_exif:
+            coords = (0.0,0.0)
             try:
                 coords = (
                     decimal_coords(img.gps_latitude, img.gps_latitude_ref),
                     decimal_coords(img.gps_longitude, img.gps_longitude_ref),
                 )
             except AttributeError:
-                coords = (0.0,0.0)
                 print("No Coordinates")
             except Exception as e:
                 print(e)

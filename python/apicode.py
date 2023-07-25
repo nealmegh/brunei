@@ -84,6 +84,9 @@ def detect_images(imagefile, rotate_180=False) -> object:
             except AttributeError:
                 coords = (0.0,0.0)
                 print("No Coordinates")
+            except Exception as e:
+                print(e)
+
         else:
             print("The Image has no EXIF information")
         print(f"Image {src.name}, OS Version:{img.get('software', 'Not Known')} ------")

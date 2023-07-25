@@ -281,6 +281,7 @@ def detect():
             plt.tight_layout()
             plt_save = f'apps/static/files/' + new_name_plt
             plt.savefig(plt_save)
+            plt.close()
             # plt.show()
             detection_response = detect_images(full_path)
             area_coverage = detection_response['a']['sem4']['coverage']

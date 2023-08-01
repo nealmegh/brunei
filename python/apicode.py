@@ -352,6 +352,9 @@ def detect_images(imagefile, rotate_180=False) -> object:
                         "coverage": len(coverage_sem1)
                         / (math.floor(maxx / 96) * math.floor(maxy / 96))
                     }
+                    stats["sem4Length"] = {
+                        "length": len(coverage_sem4)
+                    }
 
             except Exception as ex:
                 # return ex

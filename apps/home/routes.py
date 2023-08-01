@@ -90,7 +90,7 @@ def download_xls():
         pictures = Pictures.query.filter_by(tags=tags).all()
 
     # Create a list of dictionaries where each dictionary represents a user record
-    data = [{'username': picture.id, 'email': picture.user_id} for picture in pictures]
+    data = [{'ID': picture.id, 'User': picture.user_id, 'Picture': picture.path, 'Coverage in Percentage': picture.area_coverage*100, 'Total Coverage(approx) Sq Meter': picture.total_area_covered, 'Height': picture.height, 'Detection Accuracy': 86} for picture in pictures]
 
     # Convert to pandas DataFrame
     df = pd.DataFrame(data)
@@ -152,6 +152,7 @@ class UploadFileFrom(FlaskForm):
     files = MultipleFileField('File(s) Upload', validators=[InputRequired()])
     description = TextAreaField("description")
     tags = StringField("tags")
+    height = IntegerField("height")
     submit = SubmitField("Upload File")
 
 
@@ -297,8 +298,11 @@ def detect():
             geo_codes_db = json.dumps(geo_codes)
             # return jsonify(geo_codes)
             curr_user = current_user.id
+            height = form.height.data
+            total_area_coverage  = detection_response['a']['sem4Length']['length']*1.25*1.25
+
             picture = Pictures(file_path, latitude, longitude, user_id=curr_user, area_coverage=area_coverage,
-                               geo_codes=geo_codes_db, height=50, total_area_covered=98,
+                               geo_codes=geo_codes_db, height=height, total_area_covered=total_area_coverage,
                                description=description, tags=tags)
             db.session.add(picture)
             db.session.commit()

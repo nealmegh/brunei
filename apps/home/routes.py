@@ -10,13 +10,14 @@ from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from python.apicode import detect_images
 import time
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 import base64
 from re import S
 
 # from flask import Flask, render_template, send_file, request, jsonify, json, make_response
 from flask_wtf import FlaskForm
-from wtforms import FileField, SubmitField, StringField, IntegerField, HiddenField, TextAreaField, MultipleFileField
+from wtforms import FileField, SubmitField, StringField, IntegerField, HiddenField, TextAreaField, MultipleFileField, RadioField
 from werkzeug.utils import secure_filename
 # import os
 from wtforms.validators import InputRequired
@@ -51,6 +52,8 @@ from apps.pictures.models import Pictures
 import xlsxwriter
 from io import BytesIO
 import pandas as pd
+from pandas import json_normalize
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'files'
@@ -85,24 +88,90 @@ def download_xls():
     print(tags + 'ho')
     if not tags:
         pictures = Pictures.query.all()
+        tags = 'all'
     else:
         # SQLAlchemy query to get all data from User table
         pictures = Pictures.query.filter_by(tags=tags).all()
 
     # Create a list of dictionaries where each dictionary represents a user record
-    data = [{'ID': picture.id, 'User': picture.user_id, 'Picture': picture.path, 'Coverage in Percentage': picture.area_coverage*100, 'Total Coverage(approx) Sq Meter': picture.total_area_covered, 'Height': picture.height, 'Detection Accuracy': 86} for picture in pictures]
+    # data = [{'ID': picture.id, 'User': picture.user_id, 'Picture': picture.path, 'Coverage in Percentage': picture.area_coverage*100, 'Total Coverage(approx) Sq Meter': picture.total_area_covered, 'Height': picture.height, 'Detection Accuracy': 86, 'Coordinates': picture.geo_codes} for picture in pictures]
+    #
+    # # Convert to pandas DataFrame
+    # df = pd.DataFrame(data)
+    #
+    # # Write DataFrame to Excel
+    # output = BytesIO()
+    # writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    # df.to_excel(writer, sheet_name='Sheet1')
+    # writer.close()
+    # output.seek
+
+    data = [{'ID': picture.id, 'User': picture.user_id, 'Picture': picture.path,
+             'Coverage in Percentage': picture.area_coverage * 100,
+             'Total Coverage(approx) Sq Meter': picture.total_area_covered,
+             'Height': picture.height,
+             'Detection Accuracy': 86,
+             'Coordinates': picture.geo_codes} for picture in pictures]
 
     # Convert to pandas DataFrame
     df = pd.DataFrame(data)
 
+    # Create a list to hold all rows including the expanded JSON
+    expanded_data = []
+
+    # Loop through each row
+    for idx, row in df.iterrows():
+        # Load JSON (if it's a string, else pass it directly)
+        coordinates = json.loads(row['Coordinates']) if isinstance(row['Coordinates'], str) else row['Coordinates']
+
+        # Loop through each key-value pair in the coordinates dictionary
+        for key, nested_json in coordinates.items():
+            # Create a copy of the current row
+            new_row = row.copy()
+
+            # Add the key as new column in the copy of the row
+            new_row['Coordinate Key'] = key
+
+            # Loop through each key-value pair in the nested JSON
+            for nested_key, nested_value in nested_json.items():
+                # Add the nested key-value pair as new columns in the copy of the row
+                new_row['Latitude' if nested_key == '0' else 'Longitude'] = nested_value
+
+            # Append the new row to the expanded_data list
+            expanded_data.append(new_row)
+
+    # Convert the expanded_data list to a DataFrame
+    df_expanded = pd.DataFrame(expanded_data)
+
+    # Drop the Coordinates column from the DataFrame
+    df_expanded = df_expanded.drop('Coordinates', axis=1)
+
     # Write DataFrame to Excel
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, sheet_name='Sheet1')
+
+    df_expanded.to_excel(writer, sheet_name='Sheet1', index=False)
+
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+
+    for i, col in enumerate(df_expanded.columns):
+        # find length of column in excel
+        column_len = df_expanded[col].astype(str).str.len().max()
+        # Setting the length if the column header is larger than the max column value length
+        column_len = max(column_len, len(col)) + 2
+        # set the width of the column
+        worksheet.set_column(i, i, column_len)
+
     writer.close()
     output.seek(0)
+    # Generate a timestamp
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-    return send_file(output, attachment_filename='data.xlsx', as_attachment=True)
+    # Use timestamp in filename
+    filename = f"data_{tags}_{timestamp}.xlsx"
+
+    return send_file(output, attachment_filename=filename, as_attachment=True)
 
 
 # @blueprint.route('/upload')
@@ -153,6 +222,8 @@ class UploadFileFrom(FlaskForm):
     description = TextAreaField("description")
     tags = StringField("tags")
     height = IntegerField("height")
+    imageDirection = RadioField('Label', choices=[('0', 'North Facing'), ('1', 'South Facing')], default='0',
+                                validators=[InputRequired()])
     submit = SubmitField("Upload File")
 
 
@@ -285,7 +356,11 @@ def detect():
                 plt.savefig(plt_save)
                 plt.close()
                 # plt.show()
-                detection_response = detect_images(full_path)
+                if form.imageDirection.data == 1:
+                    image_rotate = True
+                else:
+                    image_rotate = False
+                detection_response = detect_images(full_path, image_rotate)
                 area_coverage = detection_response['a']['sem4']['coverage']
                 # return str(detection_response['b'][0][2])
                 latitude = detection_response['b'][0][2]

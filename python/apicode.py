@@ -136,232 +136,237 @@ def detect_images(imagefile, rotate_180=False) -> object:
     image_boundaries = []
     stats = {}
 
+    result = 'Ok'
 
-    for y in range(0, math.floor(maxy / 96) * 96, 96):
-        for x in range(0, math.floor(maxx / 96) * 96, 96):
-            try:
-                d = deepcopy(data[y: y + 96, x: x + 96])
-                imgArr.append(d)
-            except Exception as e:
-                print(e)
-                # input()
+    try:
+        for y in range(0, math.floor(maxy / 96) * 96, 96):
+            for x in range(0, math.floor(maxx / 96) * 96, 96):
+                try:
+                    d = deepcopy(data[y: y + 96, x: x + 96])
+                    imgArr.append(d)
+                except Exception as e:
+                    print(e)
+                    # input()
 
-    imgArr = np.array(imgArr)
-    imgArr = np.asarray(imgArr).astype(np.float32)
+        imgArr = np.array(imgArr)
+        imgArr = np.asarray(imgArr).astype(np.float32)
 
-    predictions = probability_model.predict(imgArr)
-    p2 = predictions.reshape((int(maxy / 96), int(maxx / 96), 2))
+        predictions = probability_model.predict(imgArr)
+        p2 = predictions.reshape((int(maxy / 96), int(maxx / 96), 2))
 
-    linewidth = 14
-    # coverage = []
-    # covergae_filtered = []
+        linewidth = 14
+        # coverage = []
+        # covergae_filtered = []
 
-    image_boundaries = deepcopy(feature)
+        image_boundaries = deepcopy(feature)
 
-    image_boundaries["geometry"]["coordinates"][0] = [
-        [
-            coords[0] - (-0.5 * maxy) * lon_per_pix,
-            coords[1] - (0.5 * maxx - maxx) * lat_per_pix,
-        ],
-        [
-            coords[0] - (-0.5 * maxy) * lon_per_pix,
-            coords[1] - (0.5 * maxx) * lat_per_pix,
-        ],
-        [
-            coords[0] - (-0.5 * maxy + maxy) * lon_per_pix,
-            coords[1] - (0.5 * maxx) * lat_per_pix,
-        ],
-        [
-            coords[0] - (-0.5 * maxy + maxy) * lon_per_pix,
-            coords[1] - (0.5 * maxx - maxx) * lat_per_pix,
-        ],
-        [
-            coords[0] - (-0.5 * maxy) * lon_per_pix,
-            coords[1] - (0.5 * maxx - maxx) * lat_per_pix,
-        ],
-    ]
+        image_boundaries["geometry"]["coordinates"][0] = [
+            [
+                coords[0] - (-0.5 * maxy) * lon_per_pix,
+                coords[1] - (0.5 * maxx - maxx) * lat_per_pix,
+            ],
+            [
+                coords[0] - (-0.5 * maxy) * lon_per_pix,
+                coords[1] - (0.5 * maxx) * lat_per_pix,
+            ],
+            [
+                coords[0] - (-0.5 * maxy + maxy) * lon_per_pix,
+                coords[1] - (0.5 * maxx) * lat_per_pix,
+            ],
+            [
+                coords[0] - (-0.5 * maxy + maxy) * lon_per_pix,
+                coords[1] - (0.5 * maxx - maxx) * lat_per_pix,
+            ],
+            [
+                coords[0] - (-0.5 * maxy) * lon_per_pix,
+                coords[1] - (0.5 * maxx - maxx) * lat_per_pix,
+            ],
+        ]
 
-    image_boundaries["properties"]["title"] = imagefile
+        image_boundaries["properties"]["title"] = imagefile
 
-    geo_boundaries["features"].append(image_boundaries)
+        geo_boundaries["features"].append(image_boundaries)
 
-    coverage_sem4.append([imagefile, 5, coords[0], coords[1], imagefile])
+        coverage_sem4.append([imagefile, 5, coords[0], coords[1], imagefile])
 
-    for y in range(0, math.floor(maxy / 96) * 96, 96):
-        for x in range(0, math.floor(maxx / 96) * 96, 96):
-            try:
-                if np.argmax(p2[int(y / 96)][int(x / 96)]) == 0:
-                    occupied_bounds = [False, False, False, False]
+        for y in range(0, math.floor(maxy / 96) * 96, 96):
+            for x in range(0, math.floor(maxx / 96) * 96, 96):
+                try:
+                    if np.argmax(p2[int(y / 96)][int(x / 96)]) == 0:
+                        occupied_bounds = [False, False, False, False]
 
-                    try:
-                        if np.argmax(p2[int(y / 96) - 1][int(x / 96)]) == 0:
-                            occupied_bounds[0] = True
-                    except:
-                        pass
+                        try:
+                            if np.argmax(p2[int(y / 96) - 1][int(x / 96)]) == 0:
+                                occupied_bounds[0] = True
+                        except:
+                            pass
 
-                    try:
-                        if np.argmax(p2[int(y / 96) + 1][int(x / 96)]) == 0:
-                            occupied_bounds[1] = True
-                    except:
-                        pass
+                        try:
+                            if np.argmax(p2[int(y / 96) + 1][int(x / 96)]) == 0:
+                                occupied_bounds[1] = True
+                        except:
+                            pass
 
-                    try:
-                        if np.argmax(p2[int(y / 96)][int(x / 96) - 1]) == 0:
-                            occupied_bounds[2] = True
-                    except:
-                        pass
+                        try:
+                            if np.argmax(p2[int(y / 96)][int(x / 96) - 1]) == 0:
+                                occupied_bounds[2] = True
+                        except:
+                            pass
 
-                    try:
-                        if np.argmax(p2[int(y / 96)][int(x / 96) + 1]) == 0:
-                            occupied_bounds[3] = True
-                    except:
-                        pass
+                        try:
+                            if np.argmax(p2[int(y / 96)][int(x / 96) + 1]) == 0:
+                                occupied_bounds[3] = True
+                        except:
+                            pass
 
-                    # coverage.append([int(x+96/2), int(y+96/2),
-                    #                 occupied_bounds.count(False)])
-                    # print(occupied_bounds.count(False))
+                        # coverage.append([int(x+96/2), int(y+96/2),
+                        #                 occupied_bounds.count(False)])
+                        # print(occupied_bounds.count(False))
 
-                    # if occupied_bounds.count(True) < 4:
-                    #     # covergae_filtered.append([int(x+96/2), int(y+96/2)])
-                    #     pass
-                    # else:
+                        # if occupied_bounds.count(True) < 4:
+                        #     # covergae_filtered.append([int(x+96/2), int(y+96/2)])
+                        #     pass
+                        # else:
 
-                    #     # diag tl-br
-                    #     for pi in range(0, 90):
-                    #         # for xi in range(0, 95):
-                    #         datacpy1[y + pi, x + pi] = [255.0, 0.0, 0.0]
-                    #         datacpy1[y + pi, x + pi + 1] = [255.0, 0.0, 0.0]
-                    #         datacpy1[y + pi, x + pi + 2] = [255.0, 0.0, 0.0]
-                    #         datacpy1[y + pi, x + pi + 3] = [255.0, 0.0, 0.0]
-                    #         datacpy1[y + pi, x + pi + 4] = [255.0, 0.0, 0.0]
-                    #         datacpy1[y + pi, x + pi + 5] = [255.0, 0.0, 0.0]
+                        #     # diag tl-br
+                        #     for pi in range(0, 90):
+                        #         # for xi in range(0, 95):
+                        #         datacpy1[y + pi, x + pi] = [255.0, 0.0, 0.0]
+                        #         datacpy1[y + pi, x + pi + 1] = [255.0, 0.0, 0.0]
+                        #         datacpy1[y + pi, x + pi + 2] = [255.0, 0.0, 0.0]
+                        #         datacpy1[y + pi, x + pi + 3] = [255.0, 0.0, 0.0]
+                        #         datacpy1[y + pi, x + pi + 4] = [255.0, 0.0, 0.0]
+                        #         datacpy1[y + pi, x + pi + 5] = [255.0, 0.0, 0.0]
 
-                    #     # diag bl-tr
-                    #     for pi in range(0, 90):
-                    #         # for xi in range(0, 95):
-                    #         datacpy1[96 + y - pi, x + pi] = [255.0, 0.0, 0.0]
-                    #         datacpy1[96 + y - pi + 1, x +
-                    #                  pi] = [255.0, 0.0, 0.0]
-                    #         datacpy1[96 + y - pi + 2, x +
-                    #                  pi] = [255.0, 0.0, 0.0]
-                    #         datacpy1[96 + y - pi + 3, x +
-                    #                  pi] = [255.0, 0.0, 0.0]
-                    #         datacpy1[96 + y - pi + 4, x +
-                    #                  pi] = [255.0, 0.0, 0.0]
-                    #         datacpy1[96 + y - pi + 5, x +
-                    #                  pi] = [255.0, 0.0, 0.0]
+                        #     # diag bl-tr
+                        #     for pi in range(0, 90):
+                        #         # for xi in range(0, 95):
+                        #         datacpy1[96 + y - pi, x + pi] = [255.0, 0.0, 0.0]
+                        #         datacpy1[96 + y - pi + 1, x +
+                        #                  pi] = [255.0, 0.0, 0.0]
+                        #         datacpy1[96 + y - pi + 2, x +
+                        #                  pi] = [255.0, 0.0, 0.0]
+                        #         datacpy1[96 + y - pi + 3, x +
+                        #                  pi] = [255.0, 0.0, 0.0]
+                        #         datacpy1[96 + y - pi + 4, x +
+                        #                  pi] = [255.0, 0.0, 0.0]
+                        #         datacpy1[96 + y - pi + 5, x +
+                        #                  pi] = [255.0, 0.0, 0.0]
 
-                    #     # top
-                    #     try:
-                    #         if occupied_bounds[0]:
-                    #             for yi in range(y, y + linewidth):
-                    #                 for xi in range(x, x + 95):
-                    #                     datacpy1[yi, xi] = [255.0, 0.0, 0.0]
-                    #     except:
-                    #         pass
+                        #     # top
+                        #     try:
+                        #         if occupied_bounds[0]:
+                        #             for yi in range(y, y + linewidth):
+                        #                 for xi in range(x, x + 95):
+                        #                     datacpy1[yi, xi] = [255.0, 0.0, 0.0]
+                        #     except:
+                        #         pass
 
-                    #     # bottom
-                    #     try:
-                    #         if occupied_bounds[1]:
-                    #             for yi in range(y + 96 - linewidth, y + 96):
-                    #                 for xi in range(x, x + 95):
-                    #                     datacpy1[yi, xi] = [255.0, 0.0, 0.0]
-                    #     except:
-                    #         pass
+                        #     # bottom
+                        #     try:
+                        #         if occupied_bounds[1]:
+                        #             for yi in range(y + 96 - linewidth, y + 96):
+                        #                 for xi in range(x, x + 95):
+                        #                     datacpy1[yi, xi] = [255.0, 0.0, 0.0]
+                        #     except:
+                        #         pass
 
-                    #     # left
-                    #     try:
-                    #         if occupied_bounds[2]:
-                    #             for xi in range(x, x + linewidth):
-                    #                 for yi in range(y, y + 96):
-                    #                     datacpy1[yi, xi] = [255.0, 0.0, 0.0]
-                    #     except:
-                    #         pass
+                        #     # left
+                        #     try:
+                        #         if occupied_bounds[2]:
+                        #             for xi in range(x, x + linewidth):
+                        #                 for yi in range(y, y + 96):
+                        #                     datacpy1[yi, xi] = [255.0, 0.0, 0.0]
+                        #     except:
+                        #         pass
 
-                    #     # right
-                    #     try:
-                    #         if occupied_bounds[3]:
-                    #             for xi in range(x + 96 - linewidth, x + 96):
-                    #                 for yi in range(y, y + 96):
-                    #                     datacpy1[yi, xi] = [255.0, 0.0, 0.0]
-                    #     except:
-                    #         pass
+                        #     # right
+                        #     try:
+                        #         if occupied_bounds[3]:
+                        #             for xi in range(x + 96 - linewidth, x + 96):
+                        #                 for yi in range(y, y + 96):
+                        #                     datacpy1[yi, xi] = [255.0, 0.0, 0.0]
+                        #     except:
+                        #         pass
 
-                    if occupied_bounds.count(True) == 1:
-                        coverage_sem1.append(
-                            [
-                                imagefile,
-                                1,
-                                coords[0] - (-0.5 * maxy + y +
-                                             96 / 2) * lon_per_pix,
-                                coords[1] - (0.5 * maxx - x +
-                                             96 / 2) * lat_per_pix,
-                                "",
-                            ]
-                        )
-                    elif occupied_bounds.count(True) == 2:
-                        coverage_sem2.append(
-                            [
-                                imagefile,
-                                2,
-                                coords[0] - (-0.5 * maxy + y +
-                                             96 / 2) * lon_per_pix,
-                                coords[1] - (0.5 * maxx - x +
-                                             96 / 2) * lat_per_pix,
-                                "",
-                            ]
-                        )
-                    elif occupied_bounds.count(True) == 3:
-                        coverage_sem3.append(
-                            [
-                                imagefile,
-                                3,
-                                coords[0] - (-0.5 * maxy + y +
-                                             96 / 2) * lon_per_pix,
-                                coords[1] - (0.5 * maxx - x +
-                                             96 / 2) * lat_per_pix,
-                                "",
-                            ]
-                        )
-                    elif occupied_bounds.count(True) == 4:
-                        coverage_sem4.append(
-                            [
-                                imagefile,
-                                4,
-                                coords[0] - (-0.5 * maxy + y +
-                                             96 / 2) * lon_per_pix,
-                                coords[1] - (0.5 * maxx - x +
-                                             96 / 2) * lat_per_pix,
-                                "",
-                            ]
-                        )
+                        if occupied_bounds.count(True) == 1:
+                            coverage_sem1.append(
+                                [
+                                    imagefile,
+                                    1,
+                                    coords[0] - (-0.5 * maxy + y +
+                                                96 / 2) * lon_per_pix,
+                                    coords[1] - (0.5 * maxx - x +
+                                                96 / 2) * lat_per_pix,
+                                    "",
+                                ]
+                            )
+                        elif occupied_bounds.count(True) == 2:
+                            coverage_sem2.append(
+                                [
+                                    imagefile,
+                                    2,
+                                    coords[0] - (-0.5 * maxy + y +
+                                                96 / 2) * lon_per_pix,
+                                    coords[1] - (0.5 * maxx - x +
+                                                96 / 2) * lat_per_pix,
+                                    "",
+                                ]
+                            )
+                        elif occupied_bounds.count(True) == 3:
+                            coverage_sem3.append(
+                                [
+                                    imagefile,
+                                    3,
+                                    coords[0] - (-0.5 * maxy + y +
+                                                96 / 2) * lon_per_pix,
+                                    coords[1] - (0.5 * maxx - x +
+                                                96 / 2) * lat_per_pix,
+                                    "",
+                                ]
+                            )
+                        elif occupied_bounds.count(True) == 4:
+                            coverage_sem4.append(
+                                [
+                                    imagefile,
+                                    4,
+                                    coords[0] - (-0.5 * maxy + y +
+                                                96 / 2) * lon_per_pix,
+                                    coords[1] - (0.5 * maxx - x +
+                                                96 / 2) * lat_per_pix,
+                                    "",
+                                ]
+                            )
 
-                    stats["sem4"] = {
-                        "coverage": len(coverage_sem4)
-                        / (math.floor(maxx / 96) * math.floor(maxy / 96))
-                    }
-                    stats["sem3"] = {
-                        "coverage": len(coverage_sem3)
-                        / (math.floor(maxx / 96) * math.floor(maxy / 96))
-                    }
-                    stats["sem2"] = {
-                        "coverage": len(coverage_sem2)
-                        / (math.floor(maxx / 96) * math.floor(maxy / 96))
-                    }
-                    stats["sem1"] = {
-                        "coverage": len(coverage_sem1)
-                        / (math.floor(maxx / 96) * math.floor(maxy / 96))
-                    }
-                    stats["sem4Length"] = {
-                        "length": len(coverage_sem4)
-                    }
+                        stats["sem4"] = {
+                            "coverage": len(coverage_sem4)
+                            / (math.floor(maxx / 96) * math.floor(maxy / 96))
+                        }
+                        stats["sem3"] = {
+                            "coverage": len(coverage_sem3)
+                            / (math.floor(maxx / 96) * math.floor(maxy / 96))
+                        }
+                        stats["sem2"] = {
+                            "coverage": len(coverage_sem2)
+                            / (math.floor(maxx / 96) * math.floor(maxy / 96))
+                        }
+                        stats["sem1"] = {
+                            "coverage": len(coverage_sem1)
+                            / (math.floor(maxx / 96) * math.floor(maxy / 96))
+                        }
+                        stats["sem4Length"] = {
+                            "length": len(coverage_sem4)
+                        }
 
-            except Exception as ex:
-                # return ex
-                print("something wrong", ex)
+                except Exception as ex:
+                    # return ex
+                    print("something wrong", ex)
 
-    # return {stats, coverage_sem4, coverage_sem3, coverage_sem2, coverage_sem1}
-    return {'a': stats, 'b': coverage_sem4, 'c': coverage_sem3, 'd': coverage_sem2, 'e': coverage_sem1}
+        # return {stats, coverage_sem4, coverage_sem3, coverage_sem2, coverage_sem1}
+    except ValueError as e:
+        result = str(e)
+
+    return {'a': stats, 'b': coverage_sem4, 'c': coverage_sem3, 'd': coverage_sem2, 'e': coverage_sem1, 'f': result}
     # datacpy1 = data
     # plt.imsave(f'Results/Images/{imgNo}_coverage_{round(len(coverage) / tcoverage, 2)}.png', datacpy1)
 

@@ -356,9 +356,12 @@ def detect():
                 plt.savefig(plt_save)
                 plt.close()
                 # plt.show()
-                if form.imageDirection.data == 1:
+                print(form.imageDirection.data)
+                if form.imageDirection.data == '1':
+                    print(True)
                     image_rotate = True
                 else:
+                    print(False)
                     image_rotate = False
                 detection_response = detect_images(full_path, image_rotate)
                 area_coverage = detection_response['a']['sem4']['coverage']

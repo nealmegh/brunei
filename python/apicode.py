@@ -28,6 +28,7 @@ import numpy as np
 from copy import deepcopy
 import pprint as pp
 import math
+import gc
 
 ################## COPY TO API GLOBAL FIELDS ####################
 
@@ -93,8 +94,8 @@ def detect_images(imagefile, rotate_180=False) -> object:
 
         return (coords[0], coords[1], img.datetime_original)
 
-    model = tf.keras.models.load_model(model_file, compile=False)
-    model.summary()
+    model = tf.keras.models.load_model(model_file, compile=False) # GC
+    # model.summary()
     probability_model = keras.Sequential([model, tf.keras.layers.Softmax()])
 
     ratio_coeff = camera_settings["A1"]["fov"] / hypotenuse
@@ -107,7 +108,7 @@ def detect_images(imagefile, rotate_180=False) -> object:
         math.tan(lfov / 2 * math.pi / 180) * 2
 
     coords = image_coordinates(imagefile)
-    img = Image.open(imagefile)
+    img = Image.open(imagefile) # GC
 
     h_metre_per_pix = h_distance / img.width
     l_metre_per_pix = l_distance / img.height
@@ -119,22 +120,22 @@ def detect_images(imagefile, rotate_180=False) -> object:
 
     img.load()
 
-    data = np.asarray(img, dtype="int32")
-    datacpy1 = np.asarray(deepcopy(data), dtype="float32")
-    datacpy1 = datacpy1 / 255.0
-    data = data / 255.0
+    data = np.asarray(img, dtype="int32") # GC
+    datacpy1 = np.asarray(deepcopy(data), dtype="float32") # GC
+    datacpy1 = datacpy1 / 255.0 # GC
+    data = data / 255.0 # GC
 
     maxy = len(data)
     maxx = len(data[0])
-    imgArr = []
+    imgArr = [] # GC
 
 
-    coverage_sem4 = []
-    coverage_sem3 = []
-    coverage_sem2 = []
-    coverage_sem1 = []
-    image_boundaries = []
-    stats = {}
+    coverage_sem4 = [] # GC
+    coverage_sem3 = [] # GC
+    coverage_sem2 = [] # GC
+    coverage_sem1 = [] # GC
+    image_boundaries = [] # GC
+    stats = {} # GC
 
     result = 'Ok'
 
@@ -148,11 +149,11 @@ def detect_images(imagefile, rotate_180=False) -> object:
                     print(e)
                     # input()
 
-        imgArr = np.array(imgArr)
-        imgArr = np.asarray(imgArr).astype(np.float32)
+        imgArr = np.array(imgArr) # GC
+        imgArr = np.asarray(imgArr).astype(np.float32) # GC
 
-        predictions = probability_model.predict(imgArr)
-        p2 = predictions.reshape((int(maxy / 96), int(maxx / 96), 2))
+        predictions = probability_model.predict(imgArr, verbose=None) # GC
+        p2 = predictions.reshape((int(maxy / 96), int(maxx / 96), 2)) # GC
 
         linewidth = 14
         # coverage = []
@@ -367,6 +368,14 @@ def detect_images(imagefile, rotate_180=False) -> object:
         result = str(e)
     except Exception as e:
         result = str(e)
+
+    del model
+    del img
+    del imgArr
+
+    tf.keras.backend.clear_session()
+
+    gc.collect()
 
     return {'a': stats, 'b': coverage_sem4, 'c': coverage_sem3, 'd': coverage_sem2, 'e': coverage_sem1, 'f': result}
     # datacpy1 = data

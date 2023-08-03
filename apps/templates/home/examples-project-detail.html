@@ -75,9 +75,13 @@
                         <!-- small box -->
                         <div class="small-box bg-success">
                           <div class="inner">
+                               {% if picture.height == 50 %}
                             <h3>{{ '%0.2f'| format(picture.area_coverage*100|float)}}<sup style="font-size: 20px">%</sup></h3>
 {#                            <span class="info-box-number text-center text-muted mb-0">{{ '%0.2f'| format(picture.area_coverage*100|float)}}%</span>#}
                             <p>Covered in Acacia (percentage)</p>
+                              {% else %}
+                              <h3>N/A</h3>
+                              {% endif %}
 {#                            <span class="info-box-text text-center text-muted">Covered in Acacia (percentage)</span>#}
                           </div>
                           <div class="icon">
@@ -98,9 +102,13 @@
                         <!-- small box -->
                         <div class="small-box bg-warning">
                           <div class="inner">
-                            <h3>{{ picture.total_area_covered}} <sup style="font-size: 20px">Sqr Meter</sup></h3>
+                              {% if picture.height == 50 %}
+                            <h3>{{ picture.total_area_covered|round }} <sup style="font-size: 20px">Sqr Meter</sup></h3>
 {#                            <span class="info-box-number text-center text-muted mb-0">{{ '%0.2f'| format(picture.area_coverage*100|float)}}%</span>#}
                             <p>Area Covered by Acacia (Approx.)</p>
+                              {% else %}
+                               <h3>N/A</h3>
+                              {% endif %}
 {#                            <span class="info-box-text text-center text-muted">Covered in Acacia (percentage)</span>#}
                           </div>
                           <div class="icon">

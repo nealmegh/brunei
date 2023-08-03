@@ -365,6 +365,8 @@ def detect_images(imagefile, rotate_180=False) -> object:
         # return {stats, coverage_sem4, coverage_sem3, coverage_sem2, coverage_sem1}
     except ValueError as e:
         result = str(e)
+    except Exception as e:
+        result = str(e)
 
     return {'a': stats, 'b': coverage_sem4, 'c': coverage_sem3, 'd': coverage_sem2, 'e': coverage_sem1, 'f': result}
     # datacpy1 = data

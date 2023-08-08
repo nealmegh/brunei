@@ -241,6 +241,11 @@ def detect():
         description = form.description.data
         tags = form.tags.data
         try:
+            uploaded_files = request.files.getlist('files')
+            MAX_FILES = 3
+            if len(uploaded_files) > MAX_FILES:
+                flash(f'You can only upload a maximum of {MAX_FILES} files at once.')
+                return redirect(url_for('home_blueprint.data_upload'))
             for file in form.files.data:
                 # file = form.files.data  # grab file
                 # description = form.description.data
